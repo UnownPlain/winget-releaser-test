@@ -1,0 +1,34 @@
+name: Publish to WinGet
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          # - windows-2025
+          # - windows-11-arm
+          # - ubuntu-24.04
+          # - ubuntu-24.04-arm
+          - ubuntu-slim
+          # - macos-26
+          # - macos-15-intel
+    steps:
+      - uses: UnownPlain/winget-releaser@pwsh-file-test
+        id: test
+        with:
+          identifier: PrismLauncher.PrismLauncher
+          version: ${{ github.event.release.tag_name }}
+          installers-regex: 'PrismLauncher-Windows-MSVC(:?-arm64|-Legacy)?-Setup-.+\.exe$'
+          token: ${{ secrets.WINGET_TOKEN }}
+          max-versions-to-keep: 5
+        env:
+          KOMAC_GITHUB_OWNER: unpn-org
+      - run: echo ${{ steps.test.outputs.pr-url }}
+        shell: bash
